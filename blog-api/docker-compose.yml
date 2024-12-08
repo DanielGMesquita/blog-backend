@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  postgres_application:
+    container_name: postgres_application
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: blogdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app-network
+
+  service-registry:
+    container_name: service-registry
+    build:
+      context: ../service-registry
+    ports:
+      - "8761:8761"
+    networks:
+      - app-network
+
+  blog-api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres_application
+      - rabbitmq
+      - service-registry
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_application:5432/blogdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://service-registry:8761/eureka/
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
