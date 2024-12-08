@@ -3,6 +3,7 @@ package com.danielmesquita.blogapi.services.impl;
 import com.danielmesquita.blogapi.models.User;
 import com.danielmesquita.blogapi.repositories.UserRepository;
 import com.danielmesquita.blogapi.services.UserService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,8 @@ public class UserServiceImpl implements UserService {
 
   @Autowired private PasswordEncoder passwordEncoder;
 
+  @Override
+  @CircuitBreaker(name = "circuitBreaker")
   public User save(User user) {
     try {
       User newUser = new User();
