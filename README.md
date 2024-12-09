@@ -20,6 +20,8 @@ This first version includes the preliminary implementation of these features.
 
 Required: Java 17, Spring 3+, Maven and Docker.
 
+There is no need to install additional dependencies beyond the pom.xml since the database (Postgres) and the message broker (RabbitMQ) are used through Docker Compose images.
+
 ```bash
 # clone repository
 git clone git@github.com:DanielGMesquita/blog-backend.git
